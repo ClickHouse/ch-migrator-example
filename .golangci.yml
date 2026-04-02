@@ -1,0 +1,15 @@
+version: "2"
+
+linters:
+  enable:
+    - sloglint
+linters-settings:
+  sloglint:
+    # Enforce using methods that accept a context.
+    context: "scope" # report only if a context exists in the scope of the outermost function
+    forbidden-keys:
+      - time
+      - ts
+      - level
+      - msg
+      - caller

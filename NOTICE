@@ -1,0 +1,20 @@
+ch-migrator-example
+Copyright 2026 ClickHouse Inc
+
+This product includes schemas derived from the OpenTelemetry Collector Contrib
+project (https://github.com/open-telemetry/opentelemetry-collector-contrib),
+specifically the ClickHouse exporter SQL templates.
+
+  Copyright The OpenTelemetry Authors
+  Licensed under the Apache License, Version 2.0
+
+The adapted schemas are located in pkg/migrations/ and include table definitions
+for OpenTelemetry logs, traces, and metrics.
+
+---
+
+This product uses the following third-party test dependency:
+
+  pgregory.net/rapid - Copyright Gregory Petrosyan
+  Licensed under the Mozilla Public License, Version 2.0 (MPL-2.0)
+  Used only in test code (pkg/property_test.go).

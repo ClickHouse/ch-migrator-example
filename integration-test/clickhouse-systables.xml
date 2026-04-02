@@ -1,0 +1,194 @@
+<?xml version="1.0"?>
+<clickhouse>
+    <query_log>
+        <database>system</database>
+        <table>query_log</table>
+        <partition_by>toYYYYMM(event_date)</partition_by>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+        <max_size_rows>1048576</max_size_rows>
+        <reserved_size_rows>8192</reserved_size_rows>
+        <buffer_size_rows_flush_threshold>524288</buffer_size_rows_flush_threshold>
+        <flush_on_crash>false</flush_on_crash>
+    </query_log>
+
+    <trace_log>
+        <database>system</database>
+        <table>trace_log</table>
+
+        <partition_by>toYYYYMM(event_date)</partition_by>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+        <max_size_rows>1048576</max_size_rows>
+        <reserved_size_rows>8192</reserved_size_rows>
+        <buffer_size_rows_flush_threshold>524288</buffer_size_rows_flush_threshold>
+        <flush_on_crash>false</flush_on_crash>
+        <symbolize>true</symbolize>
+    </trace_log>
+
+    <query_thread_log>
+        <database>system</database>
+        <table>query_thread_log</table>
+        <partition_by>toYYYYMM(event_date)</partition_by>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+        <max_size_rows>1048576</max_size_rows>
+        <reserved_size_rows>8192</reserved_size_rows>
+        <buffer_size_rows_flush_threshold>524288</buffer_size_rows_flush_threshold>
+        <flush_on_crash>false</flush_on_crash>
+    </query_thread_log>
+
+    <query_views_log>
+        <database>system</database>
+        <table>query_views_log</table>
+        <partition_by>toYYYYMM(event_date)</partition_by>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+    </query_views_log>
+
+    <part_log>
+        <database>system</database>
+        <table>part_log</table>
+        <partition_by>toYYYYMM(event_date)</partition_by>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+        <max_size_rows>1048576</max_size_rows>
+        <reserved_size_rows>8192</reserved_size_rows>
+        <buffer_size_rows_flush_threshold>524288</buffer_size_rows_flush_threshold>
+        <flush_on_crash>false</flush_on_crash>
+    </part_log>
+
+    <text_log>
+        <database>system</database>
+        <table>text_log</table>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+        <max_size_rows>1048576</max_size_rows>
+        <reserved_size_rows>8192</reserved_size_rows>
+        <buffer_size_rows_flush_threshold>524288</buffer_size_rows_flush_threshold>
+        <flush_on_crash>false</flush_on_crash>
+        <level>trace</level>
+    </text_log>
+
+    <metric_log>
+        <database>system</database>
+        <table>metric_log</table>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+        <max_size_rows>1048576</max_size_rows>
+        <reserved_size_rows>8192</reserved_size_rows>
+        <buffer_size_rows_flush_threshold>524288</buffer_size_rows_flush_threshold>
+        <collect_interval_milliseconds>1000</collect_interval_milliseconds>
+        <flush_on_crash>false</flush_on_crash>
+    </metric_log>
+
+    <latency_log>
+        <database>system</database>
+        <table>latency_log</table>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+        <max_size_rows>1048576</max_size_rows>
+        <reserved_size_rows>8192</reserved_size_rows>
+        <buffer_size_rows_flush_threshold>524288</buffer_size_rows_flush_threshold>
+        <collect_interval_milliseconds>1000</collect_interval_milliseconds>
+        <flush_on_crash>false</flush_on_crash>
+    </latency_log>
+
+    <error_log>
+        <database>system</database>
+        <table>error_log</table>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+        <max_size_rows>1048576</max_size_rows>
+        <reserved_size_rows>8192</reserved_size_rows>
+        <buffer_size_rows_flush_threshold>524288</buffer_size_rows_flush_threshold>
+        <collect_interval_milliseconds>1000</collect_interval_milliseconds>
+        <flush_on_crash>false</flush_on_crash>
+    </error_log>
+
+    <query_metric_log>
+        <database>system</database>
+        <table>query_metric_log</table>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+        <max_size_rows>1048576</max_size_rows>
+        <reserved_size_rows>8192</reserved_size_rows>
+        <buffer_size_rows_flush_threshold>524288</buffer_size_rows_flush_threshold>
+        <collect_interval_milliseconds>1000</collect_interval_milliseconds>
+        <flush_on_crash>false</flush_on_crash>
+    </query_metric_log>
+
+    <asynchronous_metric_log>
+        <database>system</database>
+        <table>asynchronous_metric_log</table>
+        <flush_interval_milliseconds>7000</flush_interval_milliseconds>
+        <max_size_rows>1048576</max_size_rows>
+        <reserved_size_rows>8192</reserved_size_rows>
+        <buffer_size_rows_flush_threshold>524288</buffer_size_rows_flush_threshold>
+        <flush_on_crash>false</flush_on_crash>
+    </asynchronous_metric_log>
+
+    <crash_log>
+        <database>system</database>
+        <table>crash_log</table>
+
+        <partition_by />
+        <flush_interval_milliseconds>1000</flush_interval_milliseconds>
+        <max_size_rows>1024</max_size_rows>
+        <reserved_size_rows>1024</reserved_size_rows>
+        <buffer_size_rows_flush_threshold>512</buffer_size_rows_flush_threshold>
+        <flush_on_crash>true</flush_on_crash>
+    </crash_log>
+
+     <session_log>
+        <database>system</database>
+        <table>session_log</table>
+
+        <partition_by>toYYYYMM(event_date)</partition_by>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+        <max_size_rows>1048576</max_size_rows>
+        <reserved_size_rows>8192</reserved_size_rows>
+        <buffer_size_rows_flush_threshold>524288</buffer_size_rows_flush_threshold>
+        <flush_on_crash>false</flush_on_crash>
+    </session_log>
+
+    <processors_profile_log>
+        <database>system</database>
+        <table>processors_profile_log</table>
+
+        <partition_by>toYYYYMM(event_date)</partition_by>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+        <max_size_rows>1048576</max_size_rows>
+        <reserved_size_rows>8192</reserved_size_rows>
+        <buffer_size_rows_flush_threshold>524288</buffer_size_rows_flush_threshold>
+        <flush_on_crash>false</flush_on_crash>
+        <ttl>event_date + INTERVAL 30 DAY DELETE</ttl>
+    </processors_profile_log>
+
+    <asynchronous_insert_log>
+        <database>system</database>
+        <table>asynchronous_insert_log</table>
+
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+        <max_size_rows>1048576</max_size_rows>
+        <reserved_size_rows>8192</reserved_size_rows>
+        <buffer_size_rows_flush_threshold>524288</buffer_size_rows_flush_threshold>
+        <flush_on_crash>false</flush_on_crash>
+        <partition_by>event_date</partition_by>
+        <ttl>event_date + INTERVAL 3 DAY</ttl>
+    </asynchronous_insert_log>
+
+    <backup_log>
+        <database>system</database>
+        <table>backup_log</table>
+        <partition_by>toYYYYMM(event_date)</partition_by>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+    </backup_log>
+
+    <s3queue_log>
+        <database>system</database>
+        <table>s3queue_log</table>
+        <partition_by>toYYYYMM(event_date)</partition_by>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+    </s3queue_log>
+
+    <blob_storage_log>
+        <database>system</database>
+        <table>blob_storage_log</table>
+        <partition_by>toYYYYMM(event_date)</partition_by>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+        <ttl>event_date + INTERVAL 30 DAY</ttl>
+    </blob_storage_log>
+    
+    <prepare_system_log_tables_on_startup>1</prepare_system_log_tables_on_startup>
+</clickhouse>
