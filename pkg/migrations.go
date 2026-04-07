@@ -27,7 +27,7 @@ func InitiateMigrations(db *sql.DB, mainCfg Config, fs fs.FS) error {
 		return fmt.Errorf("failure to SELECT 1 from DB | %w", err)
 	}
 
-	err = migrate(context.Background(), db, mainCfg.Revision, mainCfg.ForceMergeTree, mainCfg.AllowMissing, fs)
+	err = migrate(context.Background(), db, mainCfg.Revision, mainCfg.AllowMissing, fs)
 	if err != nil {
 		return fmt.Errorf("execute migrations: %w", err)
 	}
@@ -36,26 +36,7 @@ func InitiateMigrations(db *sql.DB, mainCfg Config, fs fs.FS) error {
 	return nil
 }
 
-func migrate(ctx context.Context, db *sql.DB, revision int64, forceMergeTree, allowMissing bool, rawFS fs.FS) error {
-	var replacements map[string]string
-	if forceMergeTree {
-		replacements = map[string]string{
-			"<SMT_ENGINE>":                "MergeTree()",
-			"<ReplacingMergeTree_ENGINE>":  "ReplacingMergeTree",
-			"<SummingMergeTree_ENGINE>":    "SummingMergeTree",
-			"<AggregatingMergeTree_ENGINE>": "AggregatingMergeTree",
-			"<CollapsingMergeTree_ENGINE>": "CollapsingMergeTree",
-		}
-	} else {
-		replacements = map[string]string{
-			"<SMT_ENGINE>":                "SharedMergeTree()",
-			"<ReplacingMergeTree_ENGINE>":  "SharedReplacingMergeTree",
-			"<SummingMergeTree_ENGINE>":    "SharedSummingMergeTree",
-			"<AggregatingMergeTree_ENGINE>": "SharedAggregatingMergeTree",
-			"<CollapsingMergeTree_ENGINE>": "SharedCollapsingMergeTree",
-		}
-	}
-
+func migrate(ctx context.Context, db *sql.DB, revision int64, allowMissing bool, rawFS fs.FS) error {
 	// Flatten the potentially nested migrations directory into a single flat view
 	// rooted at "."
 	mapFS := make(fstest.MapFS)
@@ -89,11 +70,7 @@ func migrate(ctx context.Context, db *sql.DB, revision int64, forceMergeTree, al
 
 	goose.SetLogger(&zerologGooseLogger{})
 
-	tfs := templatedFS{
-		fs:           mapFS,
-		replacements: replacements,
-	}
-	goose.SetBaseFS(tfs)
+	goose.SetBaseFS(mapFS)
 	err = goose.SetDialect("clickhouse")
 	if err != nil {
 		log.Error().Err(err).Msg("goose does not know dialect clickhouse!")

@@ -25,10 +25,9 @@ func TestMigrate(t *testing.T) {
 	testConn := GetTestDBConnection(t, "migrate_test_db")
 
 	config := migrations.Config{
-		ForceMergeTree: true,
-		AllowMissing:   false,
-		Revision:       0,
-		DBPassword:     "Demo",
+		AllowMissing: false,
+		Revision:     0,
+		DBPassword:   "Demo",
 	}
 	err := migrations.InitiateMigrations(testConn, config, migrations.EmbeddedMigrations)
 	assert.NoError(t, err)
@@ -78,6 +77,23 @@ func TestMigrate(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, 1, count, "table %s should exist", table)
 		}
+	})
+
+	t.Run("tables use MergeTree engine", func(t *testing.T) {
+		rows, err := testConn.Query(
+			"SELECT name, engine FROM system.tables WHERE database = 'otel' AND engine != 'MaterializedView' AND name LIKE 'otel_%'")
+		require.NoError(t, err)
+		defer func() { _ = rows.Close() }()
+
+		var count int
+		for rows.Next() {
+			var name, engine string
+			require.NoError(t, rows.Scan(&name, &engine))
+			require.Equal(t, "MergeTree", engine, "table %s should use MergeTree engine, got %s", name, engine)
+			count++
+		}
+		require.NoError(t, rows.Err())
+		require.Greater(t, count, 0, "should have found at least one otel table")
 	})
 
 	t.Run("go migration added DeploymentEnvironment column", func(t *testing.T) {

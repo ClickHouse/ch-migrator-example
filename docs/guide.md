@@ -16,7 +16,6 @@ A ClickHouse migration tool that manages schema evolution using [goose](https://
   - [CLI flags](#cli-flags)
   - [Environment variables](#environment-variables)
   - [YAML config file](#yaml-config-file)
-- [Engine placeholders](#engine-placeholders)
 - [Writing migrations](#writing-migrations)
   - [SQL migrations](#sql-migrations)
   - [Go migrations](#go-migrations)
@@ -35,7 +34,6 @@ ch-migrator-example is a **reference implementation** of a ClickHouse schema mig
 
 The framework handles:
 
-- **Engine abstraction** — Write migrations once, run them on local MergeTree or cloud SharedMergeTree
 - **Ordered execution** — Migrations run in timestamp order with tracking via a `goose_db_version` table
 - **Rollback** — Every migration has an `up` and `down` path
 - **SQL and Go migrations** — Simple DDL in SQL files, complex logic in Go
@@ -71,7 +69,6 @@ This produces `bin/ch-migrator-example`.
   --dbAddr localhost \
   --dbPort 9000 \
   --enableTLS=false \
-  --forceMergeTree \
   --dbUsername default \
   --dbPassword ''
 ```
@@ -122,7 +119,7 @@ CREATE TABLE default.goose_db_version (
     is_applied UInt8,
     date Date DEFAULT now(),
     tstamp DateTime DEFAULT now()
-) ENGINE = <SMT_ENGINE>
+) ENGINE = MergeTree()
 ORDER BY date
 ```
 
@@ -163,7 +160,6 @@ Configuration is resolved in this priority order (highest first):
   --dbPassword '' \    # Password
   --enableTLS=false \           # Disable TLS (default: true)
   --insecureSkipTLSVerify=true \# Skip certificate verification (default: true)
-  --forceMergeTree \            # Use MergeTree() for local/single-node
   --useHTTP \                   # Use HTTP protocol (for HTTPS on port 8443)
   --allowMissing \              # Allow out-of-order migration application
   --revision 20260401000007 \   # Migrate to a specific revision (default: latest)
@@ -180,7 +176,6 @@ export DBPORT=9000
 export DBUSERNAME=default
 export DBPASSWORD=secret
 export ENABLETLS=false
-export FORCEMERGETREE=true
 
 ./bin/ch-migrator-example
 ```
@@ -191,7 +186,6 @@ export FORCEMERGETREE=true
 dbAddr: localhost
 dbPort: "9000"
 enableTLS: false
-forceMergeTree: true
 DBUSERNAME: default
 DBPASSWORD: secret
 allowMissing: false
@@ -200,40 +194,6 @@ allowMissing: false
 ```bash
 ./bin/ch-migrator-example --config config.yaml
 ```
-
----
-
-## Engine placeholders
-
-ClickHouse has multiple table engine families. Local single-node instances use `MergeTree()`, while ClickHouse Cloud uses `SharedMergeTree()` or `ReplicatedMergeTree()`. The migrator handles this with placeholder tokens in SQL migrations that are replaced at runtime:
-
-| Placeholder | Default (cloud) | `--forceMergeTree` (local) |
-|---|---|---|
-| `<SMT_ENGINE>` | `SharedMergeTree()` | `MergeTree()` |
-| `<ReplacingMergeTree_ENGINE>` | `SharedReplacingMergeTree` | `ReplacingMergeTree` |
-| `<SummingMergeTree_ENGINE>` | `SharedSummingMergeTree` | `SummingMergeTree` |
-| `<AggregatingMergeTree_ENGINE>` | `SharedAggregatingMergeTree` | `AggregatingMergeTree` |
-| `<CollapsingMergeTree_ENGINE>` | `SharedCollapsingMergeTree` | `CollapsingMergeTree` |
-
-**When to use `--forceMergeTree`:** Always use this flag when targeting a local, single-node ClickHouse instance. The `SharedMergeTree` and `ReplicatedMergeTree` engines are only available in ClickHouse Cloud or replicated cluster configurations.
-
-Example — the same SQL migration works in both environments:
-
-```sql
--- +goose Up
-CREATE TABLE IF NOT EXISTS otel.otel_logs (
-    Timestamp DateTime64(9) CODEC(Delta(8), ZSTD(1)),
-    ServiceName LowCardinality(String) CODEC(ZSTD(1)),
-    Body String CODEC(ZSTD(1)),
-    -- ... more columns ...
-) ENGINE = <SMT_ENGINE>
-PARTITION BY toDate(Timestamp)
-ORDER BY (ServiceName, Timestamp)
-TTL Timestamp + toIntervalDay(180)
-SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1;
-```
-
-With `--forceMergeTree`, `<SMT_ENGINE>` becomes `MergeTree()`. Without it, it becomes `SharedMergeTree()`.
 
 ---
 
@@ -258,7 +218,7 @@ CREATE TABLE IF NOT EXISTS otel.user_events (
     UserId String CODEC(ZSTD(1)),
     EventType LowCardinality(String) CODEC(ZSTD(1)),
     Payload String CODEC(ZSTD(1))
-) ENGINE = <SMT_ENGINE>
+) ENGINE = MergeTree()
 PARTITION BY toDate(Timestamp)
 ORDER BY (UserId, Timestamp)
 TTL toDateTime(Timestamp) + toIntervalDay(90)
@@ -346,12 +306,12 @@ By default, the migrator applies all pending migrations. To migrate to a specifi
 ```bash
 # Migrate UP to revision 20260401000007 (traces MV)
 ./bin/ch-migrator-example --dbAddr localhost --dbPort 9000 \
-  --enableTLS=false --forceMergeTree \
+  --enableTLS=false \
   --revision 20260401000007
 
 # Migrate DOWN to revision 20260401000002 (only logs table remains)
 ./bin/ch-migrator-example --dbAddr localhost --dbPort 9000 \
-  --enableTLS=false --forceMergeTree \
+  --enableTLS=false \
   --revision 20260401000002
 ```
 
@@ -385,8 +345,7 @@ func main() {
     })
 
     cfg := migrations.Config{
-        ForceMergeTree: true,
-        Revision:       migrations.RevisionLatest,
+        Revision: migrations.RevisionLatest,
     }
 
     if err := migrations.InitiateMigrations(db, cfg, migrations.EmbeddedMigrations); err != nil {
@@ -423,7 +382,7 @@ err := migrations.InitiateMigrations(db, cfg, myMigrations)
 make test
 ```
 
-Runs property-based tests for the templated FS layer (engine placeholder replacement) and regression tests for known bugs.
+Runs unit tests and regression tests for known bugs.
 
 ### Integration tests
 
@@ -434,7 +393,7 @@ make integration-test
 Requires a local container runtime (Docker, OrbStack, Podman). Uses [testcontainers-go](https://github.com/testcontainers/testcontainers-go) to:
 
 1. Start a fresh ClickHouse container
-2. Run all migrations with `--forceMergeTree`
+2. Run all bundled migrations
 3. Verify every table, view, and column was created correctly
 4. Run migrations a second time to verify idempotency
 5. Test rollback behavior with a deliberately failing migration
@@ -512,7 +471,7 @@ func main() {
     db := setupClickHouse()
 
     // Run migrations before starting the server
-    cfg := migrations.Config{ForceMergeTree: false}
+    cfg := migrations.Config{}
     if err := migrations.InitiateMigrations(db, cfg, migrations.EmbeddedMigrations); err != nil {
         log.Fatal("migration failed:", err)
     }
@@ -524,10 +483,6 @@ func main() {
 ---
 
 ## Troubleshooting
-
-### "Unknown table engine SharedMergeTree"
-
-You're running against a local/single-node ClickHouse. Add `--forceMergeTree` to use `MergeTree()` instead.
 
 ### "Go functions must be registered and built into a custom binary"
 

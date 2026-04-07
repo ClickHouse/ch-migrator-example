@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS otel.otel_traces_json (
     INDEX idx_res_attr_keys ResourceAttributesKeys TYPE bloom_filter(0.01) GRANULARITY 1,
     INDEX idx_span_attr_keys SpanAttributesKeys TYPE bloom_filter(0.01) GRANULARITY 1,
     INDEX idx_duration Duration TYPE minmax GRANULARITY 1
-) ENGINE = <SMT_ENGINE>
+) ENGINE = MergeTree()
 PARTITION BY toDate(Timestamp)
 ORDER BY (ServiceName, SpanName, toDateTime(Timestamp), Timestamp)
 TTL toDateTime(Timestamp) + toIntervalDay(180)

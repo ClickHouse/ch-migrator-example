@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS otel.otel_logs (
     INDEX idx_log_attr_key mapKeys(LogAttributes) TYPE bloom_filter(0.01) GRANULARITY 1,
     INDEX idx_log_attr_value mapValues(LogAttributes) TYPE bloom_filter(0.01) GRANULARITY 1,
     INDEX idx_body Body TYPE tokenbf_v1(32768, 3, 0) GRANULARITY 8
-) ENGINE = <SMT_ENGINE>
+) ENGINE = MergeTree()
 PARTITION BY toDate(TimestampTime)
 PRIMARY KEY (ServiceName, TimestampTime)
 ORDER BY (ServiceName, TimestampTime, Timestamp)

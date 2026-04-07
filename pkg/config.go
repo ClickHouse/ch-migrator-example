@@ -15,7 +15,6 @@ type Config struct {
 	DBPort string
 
 	EnableTLS             bool
-	ForceMergeTree        bool
 	InsecureSkipTLSVerify bool
 	UseHTTP               bool
 
