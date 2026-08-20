@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS otel.otel_logs_json (
     INDEX idx_scope_attr_keys ScopeAttributesKeys TYPE bloom_filter(0.01) GRANULARITY 1,
     INDEX idx_log_attr_keys LogAttributesKeys TYPE bloom_filter(0.01) GRANULARITY 1,
     INDEX idx_body Body TYPE tokenbf_v1(32768, 3, 0) GRANULARITY 8
-) ENGINE = <SMT_ENGINE>
+) ENGINE = MergeTree()
 PARTITION BY toDate(Timestamp)
 PRIMARY KEY (ServiceName, toDateTime(Timestamp))
 ORDER BY (ServiceName, toDateTime(Timestamp), Timestamp)

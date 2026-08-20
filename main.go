@@ -62,7 +62,6 @@ func loadConfig() (migrations.Config, error) {
 	flag.String("dbPassword", "", "Database password to run migrations with")
 	flag.Bool("enableTLS", true, "enable TLS")
 	flag.Bool("insecureSkipTLSVerify", true, "skip TLS verify")
-	flag.Bool("forceMergeTree", false, "For local testing, only use MergeTree() engine")
 	flag.Bool("useHTTP", false, "Use HTTP protocol instead of native (for HTTPS on port 8443)")
 
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
@@ -86,7 +85,6 @@ func loadConfig() (migrations.Config, error) {
 		DBPort: viper.GetString("dbPort"),
 
 		EnableTLS:             viper.GetBool("enableTLS"),
-		ForceMergeTree:        viper.GetBool("forceMergeTree"),
 		InsecureSkipTLSVerify: viper.GetBool("insecureSkipTLSVerify"),
 		UseHTTP:               viper.GetBool("useHTTP"),
 

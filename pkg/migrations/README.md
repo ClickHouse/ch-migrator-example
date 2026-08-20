@@ -18,7 +18,7 @@ The file should use goose annotations:
 
 ```sql
 -- +goose Up
-CREATE TABLE IF NOT EXISTS otel.my_table (...) ENGINE = <SMT_ENGINE>;
+CREATE TABLE IF NOT EXISTS otel.my_table (...) ENGINE = MergeTree();
 
 -- +goose Down
 DROP TABLE IF EXISTS otel.my_table;
@@ -59,17 +59,3 @@ func down(ctx context.Context, tx *sql.Tx) error {
 ```
 
 Go migrations are registered via a blank import (`_ "github.com/ClickHouse/ch-migrator-example/pkg/migrations"`) in the binary's `main.go`. Library consumers who want to use their own Go migrations can omit this import and register their own.
-
-## Engine placeholders
-
-SQL migrations can use engine placeholders that are replaced at runtime by the templated FS layer:
-
-| Placeholder | Production | Local testing (`--forceMergeTree`) |
-|---|---|---|
-| `<SMT_ENGINE>` | `SharedMergeTree()` | `MergeTree()` |
-| `<ReplacingMergeTree_ENGINE>` | `SharedReplacingMergeTree` | `ReplacingMergeTree` |
-| `<SummingMergeTree_ENGINE>` | `SharedSummingMergeTree` | `SummingMergeTree` |
-| `<AggregatingMergeTree_ENGINE>` | `SharedAggregatingMergeTree` | `AggregatingMergeTree` |
-| `<CollapsingMergeTree_ENGINE>` | `SharedCollapsingMergeTree` | `CollapsingMergeTree` |
-
-This allows the same migrations to work in both local single-node and cloud replicated environments.

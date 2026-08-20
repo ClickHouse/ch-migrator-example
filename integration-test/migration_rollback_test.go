@@ -18,9 +18,8 @@ func TestMigratorRollbackFailure(t *testing.T) {
 
 	// Call InitiateMigrations with our test config
 	config := migrations.Config{
-		ForceMergeTree: true,
-		AllowMissing:   false,
-		Revision:       0, // latest
+		AllowMissing: false,
+		Revision:     0, // latest
 	}
 
 	// The InitiateMigrations will panic if the migration fails, so we need to recover

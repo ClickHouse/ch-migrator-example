@@ -6,7 +6,7 @@ A reference implementation of a ClickHouse schema migration tool built on [goose
 
 This project provides a migration framework for ClickHouse databases that supports:
 
-- **SQL migrations** with engine placeholder replacement (e.g., `<SMT_ENGINE>` becomes `SharedMergeTree()` in production or `MergeTree()` locally)
+- **SQL migrations** for schema DDL
 - **Go migrations** for dynamic, programmatic schema changes (e.g., altering TTL across tables matching a pattern)
 - **Revision targeting** — migrate up to latest, or up/down to a specific revision
 - **Rollback support** — each migration has an `up` and `down` path
@@ -34,7 +34,6 @@ make build
   --dbAddr localhost \
   --dbPort 9000 \
   --enableTLS=false \
-  --forceMergeTree \
   --dbUsername default \
   --dbPassword ''
 ```
@@ -52,24 +51,9 @@ Configuration via CLI flags, environment variables, or YAML config file (`--conf
 | `--dbPassword` | `DBPASSWORD` | | Password |
 | `--enableTLS` | `ENABLETLS` | `true` | Enable TLS |
 | `--insecureSkipTLSVerify` | `INSECURESKIPTLSVERIFY` | `true` | Skip TLS verification |
-| `--forceMergeTree` | `FORCEMERGETREE` | `false` | Use `MergeTree()` engine (required for local/single-node ClickHouse which does not support `SharedMergeTree` or `ReplicatedMergeTree`) |
 | `--useHTTP` | `USEHTTP` | `false` | Use HTTP protocol instead of native (for HTTPS connections on port 8443) |
 | `--allowMissing` | `ALLOWMISSING` | `false` | Allow out-of-order migrations (useful when branches add migrations that land in different order) |
 | `--revision` | `REVISION` | `0` (latest) | Target migration revision |
-
-## Engine placeholders
-
-SQL migrations use placeholders that are replaced at runtime:
-
-| Placeholder | Production | `--forceMergeTree` |
-|---|---|---|
-| `<SMT_ENGINE>` | `SharedMergeTree()` | `MergeTree()` |
-| `<ReplacingMergeTree_ENGINE>` | `SharedReplacingMergeTree` | `ReplacingMergeTree` |
-| `<SummingMergeTree_ENGINE>` | `SharedSummingMergeTree` | `SummingMergeTree` |
-| `<AggregatingMergeTree_ENGINE>` | `SharedAggregatingMergeTree` | `AggregatingMergeTree` |
-| `<CollapsingMergeTree_ENGINE>` | `SharedCollapsingMergeTree` | `CollapsingMergeTree` |
-
-This is handled by the templated FS layer in `pkg/templateFS.go`, which wraps Go's `embed.FS` and applies string replacements on the fly.
 
 ## Using as a library
 
